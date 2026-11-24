@@ -1,153 +1,30 @@
-<div align="center">
-
-# Habit Tracker
-
-**An offline-first, cross-platform habit tracker with real-time sync, tactile micro-interactions, connected-streak calendars, and a native Android home screen widget.**
-
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-Firestore_&_Auth-FFCA28?style=flat-square&logo=firebase&logoColor=black)
-![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?style=flat-square&logo=capacitor&logoColor=white)
-![Kotlin](https://img.shields.io/badge/Kotlin-Jetpack_Glance-7F52FF?style=flat-square&logo=kotlin&logoColor=white)
-
-[Features](#features) • [Architecture](#architecture) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Android Build](#android-build) • [Roadmap](#roadmap)
-
-</div>
-
----
-
-## Overview
-
-Habit Tracker is a minimalist, zero-cost personal productivity application designed to stay in sync across **PC (Web/PWA)**, **Android phones**, and **Android tablets**. It solves two common friction points in existing habit trackers:
-1. **Noisy interfaces & rigid day resets:** Uses a dark, distraction-free UI with a configurable logical day-reset cutoff (default `4:00 AM`) so late-night completions count toward the current day.
-2. **High logging friction:** Combines satisfying tactile feedback (spring physics, particle bursts, haptics, and Web Audio synthesis) with an interactive **Jetpack Glance** home screen widget for one-tap logging without opening the app.
-
----
-
-## Features
-
-* **Real-Time Multi-Device Sync (Offline-First):** Powered by Firebase Firestore with `persistentLocalCache`. Log habits offline on mobile and reconcile automatically across all devices when back online.
-* **Tactile Micro-Interactions:**
-  * Spring-physics checkbox animations and SVG checkmark stroke draw-in via Framer Motion.
-  * Localized 6-particle burst in each habit's accent color.
-  * Native Android haptic pulses (`@capacitor/haptics`) paired with a synthesized 45ms Web Audio API percussive pop on desktop (zero external audio assets).
-* **Connected-Streak Monthly Calendar:**
-  * **Single-Habit Mode:** Consecutive completed days visually merge into continuous rounded streak pills.
-  * **All-Habits Mode:** Renders dynamic SVG circular completion rings for every date.
-  * **Retroactive Logging:** Click or tap any past date to inspect or update historical logs.
-* **Zero-Code Habit Management:** Create, color-code, and archive habits directly in the UI. Archiving hides dropped habits from the daily checklist and widget while preserving historical calendar accuracy.
-* **Responsive Cross-Platform Layout:** Automatically adapts from a bottom-tabbed single-column view on phones to a split-screen dashboard on tablets and desktops.
-* **Native Android Home Screen Widget:** Interactive checklist widget built with **Jetpack Glance** that stays synchronized with Firestore.
-
----
-
-## Screenshots
-
-> *Replace these placeholders with screenshots from your PC PWA, Android app, and home screen widget.*
-
-| Desktop / Tablet Dashboard | Mobile Checklist & Calendar | Android Home Screen Widget |
-| :---: | :---: | :---: |
-| ![Desktop View](docs/screenshots/desktop.png) | ![Mobile View](docs/screenshots/mobile.png) | ![Widget View](docs/screenshots/widget.png) |
-
----
-
-## Architecture
-
-To guarantee conflict-free synchronization across concurrent devices, streaks are **computed dynamically from completion logs** rather than stored as mutable counters.
-
-```text
-┌───────────────────┐       ┌───────────────────────────────┐
-│  PC Web App / PWA │       │     Android Phone & Tablet    │
-│  (React + Vite)   │       │  Capacitor WebView  │  Glance │
-└─────────┬─────────┘       │   (React + Vite)    │  Widget │
-          │                 └──────────┬──────────┴────┬────┘
-          │                            │               │
-          ▼                            ▼               ▼
-┌───────────────────────────────────────────────────────────┐
-│              Firebase Firestore (Spark Free)              │
-│   • Offline Persistence (IndexedDB / Local Cache)         │
-│   • Real-Time Listeners (onSnapshot)                      │
-│   • Idempotent Composite Keys: {habitId}_{YYYY-MM-DD}     │
-└───────────────────────────────────────────────────────────┘
-```
-
-### Firestore Data Model
-
-```text
-users/{uid}/
+Habit TrackerA high-performance, offline-first cross-platform habit tracking application designed for seamless synchronization across Web (PWA), Android Phones, and Android Tablets. Built with tactile micro-interactions, custom logical day boundaries, an interactive calendar with radially-spaced completion dots, and a native Android Jetpack Glance home screen widget.🌟 Key Features⚡ Offline-First Architecture & Multi-Device SyncFirestore Local Persistence: Operates fully offline on desktop and mobile. All state changes read from and write to local cache instantly, syncing back to Firebase Firestore when connectivity is restored.Idempotent Document Log Model: Uses composite keys ({habitId}_{YYYY-MM-DD}) for completion logs to guarantee conflict-free UPSERT operations across multiple simultaneous devices.📱 Native Android Home Screen Widget (Jetpack Glance)Interactive Square Grid: Custom Kotlin & Jetpack Glance widget displaying active habits as square tiles directly on your Android home screen.Zero-Latency State Updates: Tapping a habit tile immediately flips state in local SharedPreferences and triggers a DataStore recomposition key update for sub-second UI feedback.Background Async Network Patch: Non-blocking fire-and-forget REST updates to Firestore with automatic Firebase ID token refresh handling.📅 Advanced Calendar & Streak VisualizationRadially Spaced Multi-Habit Dots: Calculates exact angular coordinates on a circular perimeter (angle = -π/2 + (2π * i) / N) around date numbers to render distinct, non-overlapping color dots for every habit completed on that day.Single-Habit Streak View: Merges consecutive completed days into continuous visual streak pills.Retroactive Logging: Tap past calendar dates to inspect, tick, or untick historical completion records.🕒 Customizable Logical Day ResetCustom Midnight Offset (Default: 4:00 AM): Prevents broken streaks for night owls by attributing completions between midnight and 4:00 AM to the previous calendar day.🎨 Micro-Interactions & UX PolishTactile Feedback Loop: Combines Framer Motion spring physics, SVG checkmark drawing animations, Web Audio API sound synthesis on desktop, and native @capacitor/haptics vibrations on Android.Full-Row Touch Targets: Entire habit card is clickable with dedicated, isolated delete buttons (e.stopPropagation()).Show/Hide Password Input: Integrated lucide-react toggle within authentication forms.🛠️ Tech StackFrontend & Web ApplicationTool / LibraryRoleReact 19UI Component FrameworkTypeScript 5Strict Static TypingViteFrontend Build Tool & Dev ServerTailwind CSS v4Utility-First Styling SystemFramer MotionPhysics-Based Component AnimationsLucide ReactModern Icon SystemMobile & Native Android IntegrationTool / LibraryRoleCapacitor 6Native Android Container & PluginsJetpack Glance 1.1Kotlin Declarative Home Screen Widget FrameworkAndroid DataStore & SharedPrefsHigh-Speed Native Local StorageKotlin CoroutinesAsynchronous Background Firestore Network PatchingBackend, Database & CI/CDTool / LibraryRoleFirebase AuthUser Authentication (Email/Password)Cloud FirestoreNoSQL Realtime Database with Offline PersistenceFirebase HostingGlobal PWA Web DistributionGitHub ActionsAutomated CI/CD Deployment Pipeline📐 Data Architecture & Firestore SchemaTo compute accurate streaks without race conditions or write conflicts, streaks are calculated on-the-fly from granular completion logs:users/{userId}/
 ├── settings/
-│   └── preferences                # { dayResetHour: 4 }
+│   └── preferences
+│       └── { dayResetHour: 4 }
 ├── habits/
-│   └── {habitId}                  # { name, color, archived, order, createdAt }
+│   └── {habitId}
+│       ├── name: string
+│       ├── color: string          // e.g. "#10B981"
+│       ├── archived: boolean
+│       ├── order: number
+│       └── createdAt: timestamp
 └── logs/
-    └── {habitId}_{YYYY-MM-DD}     # { habitId, date, completed, updatedAt }
-```
-
-Using `{habitId}_{YYYY-MM-DD}` as the document ID ensures every toggle is an idempotent `UPSERT`, preventing duplicate entries even if two devices toggle the same habit while offline.
-
----
-
-## Tech Stack
-
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React, TypeScript, Vite, Tailwind CSS v4 |
-| **Animation & Audio** | Framer Motion, Lucide React, Web Audio API |
-| **Mobile & Haptics** | Capacitor, `@capacitor/haptics` |
-| **Android Widget** | Kotlin, Jetpack Glance, Android `SharedPreferences` |
-| **Backend & Auth** | Firebase Firestore, Firebase Authentication (Email/Password) |
-| **Hosting & CI/CD** | Firebase Hosting, GitHub Actions *(optional)* |
-
----
-
-## Project Structure
-
-```text
-habit-tracker/
-├── android/                     # Native Android project (Capacitor + Jetpack Glance)
-├── public/                      # Static assets & PWA manifest
-├── src/
-│   ├── components/
-│   │   ├── AddHabitModal.tsx    # Create new habit with custom accent color
-│   │   ├── CalendarView.tsx     # Monthly calendar (connected pills & completion rings)
-│   │   └── HabitCheckbox.tsx    # Spring animation, SVG draw-in & particle burst
-│   ├── hooks/
-│   │   └── useHabitData.ts      # Real-time Firestore listeners & CRUD mutations
-│   ├── lib/
-│   │   ├── dateUtils.ts         # Custom day-reset logical date helper
-│   │   ├── feedback.ts          # Capacitor haptics + Web Audio pop synthesizer
-│   │   └── firebase.ts          # Firebase app, Auth & offline-persistent Firestore
-│   ├── App.tsx                  # Auth gate & responsive layout shell
-│   ├── index.css                # Tailwind CSS v4 entry & dark theme tokens
-│   └── types.ts                 # TypeScript interfaces for Habit & HabitLog
-├── .env.local                   # Local Firebase credentials (gitignored)
-├── capacitor.config.ts          # Capacitor app ID & webDir configuration
-└── vite.config.ts               # Vite + React + Tailwind plugin config
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-* Node.js (v22+ recommended)
-* A free [Firebase](https://console.firebase.google.com/) project (Spark Plan)
-* [Android Studio](https://developer.android.com/studio) *(only required for building the Android APK and widget)*
-
-### 1. Clone & Install Dependencies
-```bash
-git clone [https://github.com/](https://github.com/)<your-username>/habit-tracker.git
+    └── {habitId}_{YYYY-MM-DD}     // Composite Document ID
+        ├── habitId: string
+        ├── date: string           // "YYYY-MM-DD"
+        ├── completed: boolean
+        └── updatedAt: timestamp
+🚀 Getting Started (Local Development)PrerequisitesNode.js: v18.0.0 or highernpm: v9.0.0 or higherAndroid Studio: Ladybug (2024.2.1) or newer with JDK 17/21 installed1. Clone & Install Dependenciesgit clone https://github.com/cesposhere/habit-tracker.git
 cd habit-tracker
 npm install
-```
-
-### 2. Configure Firebase
-1. In the Firebase Console, enable **Authentication → Email/Password** and create your user account.
-2. Create a **Firestore Database** in production mode and apply the security rules below:
-
-```javascript
-rules_version = '2';
+2. Configure Environment VariablesCreate a .env.local file in the root directory:VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id_here
+VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id_here
+3. Setup Firestore Security RulesIn your Firebase Console under Firestore Database → Rules, paste:rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId}/{document=**} {
@@ -155,66 +32,7 @@ service cloud.firestore {
     }
   }
 }
-```
-
-3. Register a Web App in Firebase Project Settings and create a `.env.local` file in the project root:
-
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-### 3. Run Locally
-```bash
-npm run dev
-```
-
----
-
-## Android Build
-
-Build the web bundle and sync it into the native Android project:
-
-```bash
-npm run build
+4. Run Web Applicationnpm run dev
+Open http://localhost:5173 in your browser.📱 Building for Android & Testing the Widget1. Sync React Web Build to Android Projectnpm run build
 npx cap sync android
-```
-
-Open the `android/` directory in **Android Studio** to:
-* Run directly on a USB-connected phone or tablet (`Run ▶`).
-* Generate a sideloadable `.apk` via **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
-
----
-
-## Deployment (Firebase Hosting)
-
-Deploy the web client / PWA for free:
-
-```bash
-npm run build
-firebase deploy --only hosting
-```
-
----
-
-## Roadmap
-
-- [x] Core React + TypeScript + Tailwind v4 UI
-- [x] Real-time offline-first Firestore sync & single-user security rules
-- [x] Tactile tick feedback (spring physics, particles, haptics, Web Audio)
-- [x] Connected-streak monthly calendar & retroactive logging
-- [x] Capacitor Android wrapper
-- [ ] Interactive Jetpack Glance Android home screen widget
-- [ ] In-app settings modal for custom day-reset hour & sound toggle
-- [ ] Automated CI/CD deployment via GitHub Actions
-
----
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).#   h a b i t - t r a c k d e r  
- 
+2. Build & Launch via Android StudioOpen Android Studio.Choose Open Project and navigate to the habit-tracker/android directory.Select your target physical device (via USB Debugging) or Virtual Emulator.Click Run (▶) or select Build → Build Bundle(s) / APK(s) → Build APK(s).3. Adding the Widget to Your Home ScreenOpen the app on your phone and log in to load your habits.Return to your phone's home screen and long-press any blank space.Select Widgets → Scroll to Habit Tracker.Drag the widget onto your home screen and resize to your preference.🤖 GitHub Actions Automated DeploymentThis repository includes continuous deployment for Firebase Hosting via GitHub Actions.Setting Up Secret Keys on GitHubGo to your repository on GitHub: Settings → Secrets and variables → Actions.Click New repository secret and add the following 6 secrets from your .env.local:VITE_FIREBASE_API_KEYVITE_FIREBASE_AUTH_DOMAINVITE_FIREBASE_PROJECT_IDVITE_FIREBASE_STORAGE_BUCKETVITE_FIREBASE_MESSAGING_SENDER_IDVITE_FIREBASE_APP_IDWhenever changes are merged into the main branch, GitHub Actions automatically builds the project and deploys it live to Firebase Hosting.📜 LicenseDistributed under the MIT License. See LICENSE for more information.
